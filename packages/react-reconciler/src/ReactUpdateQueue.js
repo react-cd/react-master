@@ -413,12 +413,13 @@ function getStateFromUpdate<State>(
   return prevState;
 }
 
+//  进程 更新 队列
 export function processUpdateQueue<State>(
   workInProgress: Fiber,
   queue: UpdateQueue<State>,
-  props: any,
+  props: any, // 需要更新的
   instance: any,
-  renderExpirationTime: ExpirationTime,
+  renderExpirationTime: ExpirationTime, // 这个时间在react 非常有用
 ): void {
   hasForceUpdate = false;
 

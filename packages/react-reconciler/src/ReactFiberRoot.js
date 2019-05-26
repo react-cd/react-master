@@ -107,7 +107,7 @@ export type FiberRoot = {
 
 export function createFiberRoot(
   containerInfo: any,
-  isConcurrent: boolean,
+  isConcurrent: boolean, 
   hydrate: boolean,
 ): FiberRoot {
   // Cyclic construction. This cheats the type system right now because
@@ -117,8 +117,8 @@ export function createFiberRoot(
   let root;
   if (enableSchedulerTracing) {
     root = ({
-      current: uninitializedFiber,
-      containerInfo: containerInfo,
+      current: uninitializedFiber, // 上一次的 fiber
+      containerInfo: containerInfo, //容器真实dom
       pendingChildren: null,
 
       earliestPendingTime: NoWork,

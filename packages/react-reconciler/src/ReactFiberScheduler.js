@@ -277,7 +277,7 @@ let passiveEffectCallback: * = null;
 let legacyErrorBoundariesThatAlreadyFailed: Set<mixed> | null = null;
 
 // Used for performance tracking.
-let interruptedBy: Fiber | null = null;
+let interruptedBy: Fiber | null = null; 
 
 let stashedWorkInProgressProperties;
 let replayUnitOfWork;
@@ -1876,9 +1876,10 @@ function scheduleWork(fiber: Fiber, expirationTime: ExpirationTime) {
   markPendingPriorityLevel(root, expirationTime);
   if (
     // If we're in the render phase, we don't need to schedule this root
+    // 如果我们在render阶段，我们是没有必要调度root的
     // for an update, because we'll do it before we exit...
     !isWorking ||
-    isCommitting ||
+    isCommitting || // 在commit   阶段  是可以再次 render   requestWork的
     // ...unless this is a different root than the one we're rendering.
     nextRoot !== root
   ) {
@@ -1951,6 +1952,7 @@ let isBatchingInteractiveUpdates: boolean = false;
 let completedBatches: Array<Batch> | null = null;
 
 let originalStartTimeMs: number = now();
+// 页面打开 计算网页从performance.timing.navigationStart到当前时间的毫秒数
 let currentRendererTime: ExpirationTime = msToExpirationTime(
   originalStartTimeMs,
 );
@@ -1962,6 +1964,7 @@ let nestedUpdateCount: number = 0;
 let lastCommittedRootDuringThisBatch: FiberRoot | null = null;
 
 function recomputeCurrentRendererTime() {
+  
   const currentTimeMs = now() - originalStartTimeMs;
   currentRendererTime = msToExpirationTime(currentTimeMs);
 }
@@ -2094,7 +2097,7 @@ function requestCurrentTime() {
   // within the same event to receive different expiration times, leading to
   // tearing. Return the last read time. During the next idle callback, the
   // time will be updated.
-  return currentSchedulerTime;
+  return currentSchedulerTime; // 当前的调度时间
 }
 
 // requestWork is called by the scheduler whenever a root receives an update.
@@ -2130,7 +2133,7 @@ function requestWork(root: FiberRoot, expirationTime: ExpirationTime) {
 function addRootToSchedule(root: FiberRoot, expirationTime: ExpirationTime) {
   // Add the root to the schedule.
   // Check if this root is already part of the schedule.
-  if (root.nextScheduledRoot === null) {
+  if (root.nextScheduledRoot === null) {// 说明  没有放在
     // This root is not already scheduled. Add it.
     root.expirationTime = expirationTime;
     if (lastScheduledRoot === null) {
@@ -2144,7 +2147,7 @@ function addRootToSchedule(root: FiberRoot, expirationTime: ExpirationTime) {
   } else {
     // This root is already scheduled, but its priority may have increased.
     const remainingExpirationTime = root.expirationTime;
-    if (expirationTime > remainingExpirationTime) {
+    if (expirationTime > remainingExpirationTime) { // 更新优先级 expirationTime   越大就说明优先级 越高 
       // Update the priority.
       root.expirationTime = expirationTime;
     }
@@ -2494,14 +2497,16 @@ function batchedUpdates<A, R>(fn: (a: A) => R, a: A): R {
 // TODO: Batching should be implemented at the renderer level, not inside
 // the reconciler.
 function unbatchedUpdates<A, R>(fn: (a: A) => R, a: A): R {
-  if (isBatchingUpdates && !isUnbatchingUpdates) {
-    isUnbatchingUpdates = true;
+  // 是否正在批量更新  && 没有批量更新
+  if (isBatchingUpdates && !isUnbatchingUpdates) { //  正在批量更新会走到if 里面
+    isUnbatchingUpdates = true; //  
     try {
       return fn(a);
     } finally {
       isUnbatchingUpdates = false;
     }
   }
+  // 不是批量更新
   return fn(a);
 }
 

@@ -3,7 +3,7 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
+ * 哪种 更新类型
  * @flow
  */
 
@@ -14,10 +14,10 @@ export const NoEffect = /*              */ 0b000000000000;
 export const PerformedWork = /*         */ 0b000000000001;
 
 // You can change the rest (and add more).
-export const Placement = /*             */ 0b000000000010;
-export const Update = /*                */ 0b000000000100;
-export const PlacementAndUpdate = /*    */ 0b000000000110;
-export const Deletion = /*              */ 0b000000001000;
+export const Placement = /*             */ 0b000000000010; // 掺入
+export const Update = /*                */ 0b000000000100; // 更新
+export const PlacementAndUpdate = /*    */ 0b000000000110; // 删除
+export const Deletion = /*              */ 0b000000001000;  // 删除
 export const ContentReset = /*          */ 0b000000010000;
 export const Callback = /*              */ 0b000000100000;
 export const DidCapture = /*            */ 0b000001000000;

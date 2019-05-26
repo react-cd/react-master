@@ -156,6 +156,7 @@ if (__DEV__) {
 
 setRestoreImplementation(restoreControlledState);
 
+// 类型别名
 export type DOMContainer =
   | (Element & {
       _reactRootContainer: ?Root,
@@ -341,6 +342,7 @@ ReactWork.prototype.then = function(onCommit: () => mixed): void {
   callbacks.push(onCommit);
 };
 ReactWork.prototype._onCommit = function(): void {
+  
   if (this._didCommit) {
     return;
   }
@@ -367,6 +369,7 @@ function ReactRoot(
   isConcurrent: boolean,
   hydrate: boolean,
 ) {
+  // 如何创建root
   const root = createContainer(container, isConcurrent, hydrate);
   this._internalRoot = root;
 }
@@ -375,9 +378,11 @@ ReactRoot.prototype.render = function(
   callback: ?() => mixed,
 ): Work {
   const root = this._internalRoot;
+  // 这个位置很重要吗
   const work = new ReactWork();
   callback = callback === undefined ? null : callback;
   if (__DEV__) {
+    // callback 无效警告
     warnOnInvalidCallback(callback, 'render');
   }
   if (callback !== null) {
@@ -503,33 +508,7 @@ function legacyCreateRootFromDOMContainer(
     let warned = false;
     let rootSibling;
     while ((rootSibling = container.lastChild)) {
-      if (__DEV__) {
-        if (
-          !warned &&
-          rootSibling.nodeType === ELEMENT_NODE &&
-          (rootSibling: any).hasAttribute(ROOT_ATTRIBUTE_NAME)
-        ) {
-          warned = true;
-          warningWithoutStack(
-            false,
-            'render(): Target node has markup rendered by React, but there ' +
-              'are unrelated nodes as well. This is most commonly caused by ' +
-              'white-space inserted around server-rendered markup.',
-          );
-        }
-      }
       container.removeChild(rootSibling);
-    }
-  }
-  if (__DEV__) {
-    if (shouldHydrate && !forceHydrate && !warnedAboutHydrateAPI) {
-      warnedAboutHydrateAPI = true;
-      lowPriorityWarning(
-        false,
-        'render(): Calling ReactDOM.render() to hydrate server-rendered markup ' +
-          'will stop working in React v17. Replace the ReactDOM.render() call ' +
-          'with ReactDOM.hydrate() if you want React to attach to the server HTML.',
-      );
     }
   }
   // Legacy roots are not async by default.
@@ -544,15 +523,16 @@ function legacyRenderSubtreeIntoContainer(
   forceHydrate: boolean,
   callback: ?Function,
 ) {
-  if (__DEV__) {
-    topLevelUpdateWarnings(container);
-  }
-
+//  null,
+//  element,
+//  container,
+//  false,
+//  callback,
   // TODO: Without `any` type, Flow says "Property cannot be accessed on any
   // member of intersection type." Whyyyyyy.
   let root: Root = (container._reactRootContainer: any);
   if (!root) {
-    // Initial mount
+    // Initial mount new ReactRoot();
     root = container._reactRootContainer = legacyCreateRootFromDOMContainer(
       container,
       forceHydrate,
@@ -564,7 +544,7 @@ function legacyRenderSubtreeIntoContainer(
         originalCallback.call(instance);
       };
     }
-    // Initial mount should not be batched.
+    // Initial mount should not be batched. // 不要批量更新
     unbatchedUpdates(() => {
       if (parentComponent != null) {
         root.legacy_renderSubtreeIntoContainer(
@@ -613,81 +593,12 @@ function createPortal(
 
 const ReactDOM: Object = {
   createPortal,
-
-  findDOMNode(
-    componentOrElement: Element | ?React$Component<any, any>,
-  ): null | Element | Text {
-    if (__DEV__) {
-      let owner = (ReactCurrentOwner.current: any);
-      if (owner !== null && owner.stateNode !== null) {
-        const warnedAboutRefsInRender =
-          owner.stateNode._warnedAboutRefsInRender;
-        warningWithoutStack(
-          warnedAboutRefsInRender,
-          '%s is accessing findDOMNode inside its render(). ' +
-            'render() should be a pure function of props and state. It should ' +
-            'never access something that requires stale data from the previous ' +
-            'render, such as refs. Move this logic to componentDidMount and ' +
-            'componentDidUpdate instead.',
-          getComponentName(owner.type) || 'A component',
-        );
-        owner.stateNode._warnedAboutRefsInRender = true;
-      }
-    }
-    if (componentOrElement == null) {
-      return null;
-    }
-    if ((componentOrElement: any).nodeType === ELEMENT_NODE) {
-      return (componentOrElement: any);
-    }
-    if (__DEV__) {
-      return findHostInstanceWithWarning(componentOrElement, 'findDOMNode');
-    }
-    return findHostInstance(componentOrElement);
-  },
-
-  hydrate(element: React$Node, container: DOMContainer, callback: ?Function) {
-    invariant(
-      isValidContainer(container),
-      'Target container is not a DOM element.',
-    );
-    if (__DEV__) {
-      warningWithoutStack(
-        !container._reactHasBeenPassedToCreateRootDEV,
-        'You are calling ReactDOM.hydrate() on a container that was previously ' +
-          'passed to ReactDOM.%s(). This is not supported. ' +
-          'Did you mean to call createRoot(container, {hydrate: true}).render(element)?',
-        enableStableConcurrentModeAPIs ? 'createRoot' : 'unstable_createRoot',
-      );
-    }
-    // TODO: throw or warn if we couldn't hydrate?
-    return legacyRenderSubtreeIntoContainer(
-      null,
-      element,
-      container,
-      true,
-      callback,
-    );
-  },
-
   render(
     element: React$Element<any>,
     container: DOMContainer,
     callback: ?Function,
   ) {
-    invariant(
-      isValidContainer(container),
-      'Target container is not a DOM element.',
-    );
-    if (__DEV__) {
-      warningWithoutStack(
-        !container._reactHasBeenPassedToCreateRootDEV,
-        'You are calling ReactDOM.render() on a container that was previously ' +
-          'passed to ReactDOM.%s(). This is not supported. ' +
-          'Did you mean to call root.render(element)?',
-        enableStableConcurrentModeAPIs ? 'createRoot' : 'unstable_createRoot',
-      );
-    }
+    // 遗留渲染子树进入容器
     return legacyRenderSubtreeIntoContainer(
       null,
       element,
@@ -721,31 +632,7 @@ const ReactDOM: Object = {
   },
 
   unmountComponentAtNode(container: DOMContainer) {
-    invariant(
-      isValidContainer(container),
-      'unmountComponentAtNode(...): Target container is not a DOM element.',
-    );
-
-    if (__DEV__) {
-      warningWithoutStack(
-        !container._reactHasBeenPassedToCreateRootDEV,
-        'You are calling ReactDOM.unmountComponentAtNode() on a container that was previously ' +
-          'passed to ReactDOM.%s(). This is not supported. Did you mean to call root.unmount()?',
-        enableStableConcurrentModeAPIs ? 'createRoot' : 'unstable_createRoot',
-      );
-    }
-
     if (container._reactRootContainer) {
-      if (__DEV__) {
-        const rootEl = getReactRootElementInContainer(container);
-        const renderedByDifferentReact = rootEl && !getInstanceFromNode(rootEl);
-        warningWithoutStack(
-          !renderedByDifferentReact,
-          "unmountComponentAtNode(): The node you're attempting to unmount " +
-            'was rendered by another copy of React.',
-        );
-      }
-
       // Unmount should not be batched.
       unbatchedUpdates(() => {
         legacyRenderSubtreeIntoContainer(null, null, container, false, () => {
@@ -756,28 +643,6 @@ const ReactDOM: Object = {
       // get `true` twice. That's probably fine?
       return true;
     } else {
-      if (__DEV__) {
-        const rootEl = getReactRootElementInContainer(container);
-        const hasNonRootReactChild = !!(rootEl && getInstanceFromNode(rootEl));
-
-        // Check if the container itself is a React root node.
-        const isContainerReactRoot =
-          container.nodeType === ELEMENT_NODE &&
-          isValidContainer(container.parentNode) &&
-          !!container.parentNode._reactRootContainer;
-
-        warningWithoutStack(
-          !hasNonRootReactChild,
-          "unmountComponentAtNode(): The node you're attempting to unmount " +
-            'was rendered by React and is not a top-level container. %s',
-          isContainerReactRoot
-            ? 'You may have accidentally passed in a React root node instead ' +
-              'of its container.'
-            : 'Instead, have the parent component update its state and ' +
-              'rerender in order to remove this component.',
-        );
-      }
-
       return false;
     }
   },
@@ -834,20 +699,6 @@ function createRoot(container: DOMContainer, options?: RootOptions): ReactRoot {
   const functionName = enableStableConcurrentModeAPIs
     ? 'createRoot'
     : 'unstable_createRoot';
-  invariant(
-    isValidContainer(container),
-    '%s(...): Target container is not a DOM element.',
-    functionName,
-  );
-  if (__DEV__) {
-    warningWithoutStack(
-      !container._reactRootContainer,
-      'You are calling ReactDOM.%s() on a container that was previously ' +
-        'passed to ReactDOM.render(). This is not supported.',
-      enableStableConcurrentModeAPIs ? 'createRoot' : 'unstable_createRoot',
-    );
-    container._reactHasBeenPassedToCreateRootDEV = true;
-  }
   const hydrate = options != null && options.hydrate === true;
   return new ReactRoot(container, true, hydrate);
 }
@@ -864,30 +715,5 @@ const foundDevTools = injectIntoDevTools({
   rendererPackageName: 'react-dom',
 });
 
-if (__DEV__) {
-  if (!foundDevTools && canUseDOM && window.top === window.self) {
-    // If we're in Chrome or Firefox, provide a download link if not installed.
-    if (
-      (navigator.userAgent.indexOf('Chrome') > -1 &&
-        navigator.userAgent.indexOf('Edge') === -1) ||
-      navigator.userAgent.indexOf('Firefox') > -1
-    ) {
-      const protocol = window.location.protocol;
-      // Don't warn in exotic cases like chrome-extension://.
-      if (/^(https?|file):$/.test(protocol)) {
-        console.info(
-          '%cDownload the React DevTools ' +
-            'for a better development experience: ' +
-            'https://fb.me/react-devtools' +
-            (protocol === 'file:'
-              ? '\nYou might need to use a local HTTP server (instead of file://): ' +
-                'https://fb.me/react-devtools-faq'
-              : ''),
-          'font-weight:bold',
-        );
-      }
-    }
-  }
-}
 
 export default ReactDOM;

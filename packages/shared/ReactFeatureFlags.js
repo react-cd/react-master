@@ -29,6 +29,7 @@ export const warnAboutDeprecatedLifecycles = false;
 export const enableProfilerTimer = __PROFILE__;
 
 // Trace which interactions trigger each commit.
+// global.__PROFILE__ = NODE_ENV === 'development';
 export const enableSchedulerTracing = __PROFILE__;
 
 // Only used in www builds.

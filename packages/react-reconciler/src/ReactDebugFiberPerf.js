@@ -224,6 +224,7 @@ export function recordEffect(): void {
   }
 }
 
+// 记录更新计划
 export function recordScheduleUpdate(): void {
   if (enableUserTimingAPI) {
     if (isCommitting) {

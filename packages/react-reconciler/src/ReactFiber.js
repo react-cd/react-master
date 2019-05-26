@@ -7,6 +7,8 @@
  * @flow
  */
 
+// 引入类型别名
+
 import type {ReactElement, Source} from 'shared/ReactElementType';
 import type {ReactFragment, ReactPortal, RefObject} from 'shared/ReactTypes';
 import type {WorkTag} from 'shared/ReactWorkTags';
@@ -98,7 +100,7 @@ export type Fiber = {|
   tag: WorkTag,
 
   // Unique identifier of this child.
-  key: null | string,
+  key: null | string, 
 
   // The value of element.type which is used to preserve the identity during
   // reconciliation of this child.
@@ -156,7 +158,7 @@ export type Fiber = {|
   effectTag: SideEffectTag,
 
   // Singly linked list fast path to the next fiber with side-effects.
-  nextEffect: Fiber | null,
+  nextEffect: Fiber | null, //
 
   // The first and last fiber with side-effect within this subtree. This allows
   // us to reuse a slice of the linked list when we reuse the work done within

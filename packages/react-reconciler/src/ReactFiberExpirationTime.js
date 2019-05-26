@@ -7,11 +7,12 @@
  * @flow
  */
 
+//  创建优先级的文件，越大就说明 文件优先级 越高
 import MAX_SIGNED_31_BIT_INT from './maxSigned31BitInt';
 
 export type ExpirationTime = number;
 
-export const NoWork = 0;
+export const NoWork = 0; //  最低的优先级 
 export const Never = 1;
 export const Sync = MAX_SIGNED_31_BIT_INT;
 
